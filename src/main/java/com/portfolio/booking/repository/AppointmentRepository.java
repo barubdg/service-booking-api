@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public class AppointmentRepository {
 
-    private final ArrayList<Appointment> appointments = new ArrayList<>();
+    private final List<Appointment> appointments = new ArrayList<>();
     private Long nextId = 1L;
 
     public Appointment save(Appointment appointment)
