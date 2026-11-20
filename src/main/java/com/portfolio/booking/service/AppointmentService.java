@@ -74,4 +74,9 @@ public class AppointmentService
     {
         return appointmentRepository.findAll();
     }
+
+    public Appointment getAppointmentById(Long id)
+    {
+        return appointmentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+    }
 }

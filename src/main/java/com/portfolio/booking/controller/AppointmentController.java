@@ -40,4 +40,12 @@ public class AppointmentController {
         List<AppointmentResponse> appointments = appointmentService.getAllAppointments().stream().map(AppointmentResponse::from).toList();
         return ResponseEntity.ok(appointments);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AppointmentResponse> getAppointmentById(@PathVariable Long id)
+    {
+        Appointment appointment = appointmentService.getAppointmentById(id);
+        AppointmentResponse response = AppointmentResponse.from(appointment);
+        return ResponseEntity.ok(response);
+    }
 }
