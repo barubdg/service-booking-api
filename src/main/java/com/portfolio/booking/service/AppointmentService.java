@@ -79,4 +79,56 @@ public class AppointmentService
     {
         return appointmentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
     }
+
+    public Appointment updateAppointment(Long appointmentId, Long customerId, Long professionalId, Long serviceId, LocalDateTime startDateTime)
+    {
+
+        // Verify that Appointment exists.
+        Appointment existingAppointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+
+        // Retrieve the related entities (Customer, Professional and Service)
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        Professional professional = professionalRepository.findById(professionalId)
+                .orElseThrow(() -> new IllegalArgumentException("Professional not found"));
+        Service service = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new IllegalArgumentException("Service not found"));
+
+        // Validate the start date
+        if(!startDateTime.isAfter(LocalDateTime.now()))
+        {
+            throw new IllegalArgumentException("Appointment must start in the future");
+        }
+
+        // Calculate the new end date
+        LocalDateTime endDateTime = startDateTime.plusMinutes(service.getDurationMinutes());
+
+        // Check scheduling conflicts, excluding the current appointment
+        List<Appointment> professionalAppointments = appointmentRepository.findByProfessional(professionalId);
+
+        boolean hasConflict = professionalAppointments.stream()
+            .filter(appointment -> appointment.getStatus() == AppointmentStatus.SCHEDULED)
+            .filter(appointment -> !appointment.getId().equals(appointmentId))
+            .anyMatch(appointment -> startDateTime.isBefore(appointment.getEndDateTime()) &&
+                    endDateTime.isAfter(appointment.getStartDateTime()));
+
+        if (hasConflict)
+        {
+            throw new IllegalArgumentException("The professional already has an appointment at this time");
+        }
+
+        // Create the updated appointment preserving its ID
+        Appointment updateAppointment = new Appointment(
+                existingAppointment.getId(),
+                customer,
+                professional,
+                service,
+                startDateTime,
+                endDateTime,
+                existingAppointment.getStatus()
+        );
+
+        return appointmentRepository.update(updateAppointment);
+    }
 }

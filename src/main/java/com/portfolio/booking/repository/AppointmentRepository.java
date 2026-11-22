@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -48,4 +49,23 @@ public class AppointmentRepository {
                 .filter(appointment -> appointment.getProfessional().getId().equals(professionalId))
                 .toList();
     }
+
+    public Appointment update(Appointment appointment)
+    {
+        if(appointment == null || appointment.getId() == null)
+        {
+            throw new IllegalArgumentException("Appointment id not found");
+        }
+        for (int i = 0; i < appointments.size(); i++)
+        {
+            Appointment current = appointments.get(i);
+            if(Objects.equals(current.getId(), appointment.getId()))
+            {
+                appointments.set(i, appointment);
+                return appointment;
+            }
+        }
+        throw new IllegalArgumentException("Appointment not found with id"+ appointment.getId());
+    }
+
 }

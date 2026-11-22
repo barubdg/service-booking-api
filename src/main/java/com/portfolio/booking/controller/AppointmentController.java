@@ -48,4 +48,20 @@ public class AppointmentController {
         AppointmentResponse response = AppointmentResponse.from(appointment);
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AppointmentResponse> updateAppointment(@PathVariable Long id,
+                                                                 @RequestBody AppointmentRequest request)
+    {
+        Appointment updateAppointment = appointmentService.updateAppointment(
+                        id,
+                        request.customerId(),
+                        request.professionalId(),
+                        request.serviceId(),
+                        request.startDateTime());
+
+        AppointmentResponse response = AppointmentResponse.from(updateAppointment);
+        return ResponseEntity.ok(response);
+    }
+
 }
