@@ -2,7 +2,7 @@ package com.portfolio.booking.dto.response;
 
 import com.portfolio.booking.model.Professional;
 
-public record ProfessionalResponse (Long id, String name, String email, String specialty) {
+public record ProfessionalResponse (Long id, String name, String email, String specialty, boolean active) {
 
     public static ProfessionalResponse from(Professional professional)
     {
@@ -11,8 +11,8 @@ public record ProfessionalResponse (Long id, String name, String email, String s
                         professional.getId(),
                         professional.getName(),
                         professional.getEmail(),
-                        professional.getSpecialty()
+                        professional.getSpecialty(),
+                        professional.isActive()
                 );
     }
-
 }

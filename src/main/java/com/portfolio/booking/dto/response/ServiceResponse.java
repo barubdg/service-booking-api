@@ -4,7 +4,7 @@ import com.portfolio.booking.model.Service;
 
 import java.math.BigDecimal;
 
-public record ServiceResponse (Long id, String name, String description, Integer durationMinutes, BigDecimal price)
+public record ServiceResponse (Long id, String name, String description, Integer durationMinutes, BigDecimal price, boolean active)
 {
     public static ServiceResponse from(Service service)
     {
@@ -13,8 +13,8 @@ public record ServiceResponse (Long id, String name, String description, Integer
                 service.getName(),
                 service.getDescription(),
                 service.getDurationMinutes(),
-                service.getPrice()
+                service.getPrice(),
+                service.isActive()
         );
     }
-
 }

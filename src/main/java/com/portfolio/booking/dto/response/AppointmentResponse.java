@@ -6,7 +6,8 @@ import com.portfolio.booking.model.AppointmentStatus;
 import java.time.LocalDateTime;
 
 public record AppointmentResponse (Long id, Long customerId, String customerName, Long professionalId, String professionalName,
-                                   Long serviceId, String serviceName, LocalDateTime startDateTime, LocalDateTime endDateTime, AppointmentStatus status) {
+                                   Long serviceId, String serviceName, LocalDateTime startDateTime, LocalDateTime endDateTime, AppointmentStatus status,
+                                   LocalDateTime createdAt) {
 
     public static AppointmentResponse from(Appointment appointment)
     {
@@ -19,6 +20,7 @@ public record AppointmentResponse (Long id, Long customerId, String customerName
                 appointment.getService().getName(),
                 appointment.getStartDateTime(),
                 appointment.getEndDateTime(),
-                appointment.getStatus());
+                appointment.getStatus(),
+                appointment.getCreatedAt());
     }
 }
