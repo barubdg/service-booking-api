@@ -6,6 +6,7 @@ import com.portfolio.booking.repository.CustomerRepository;
 import com.portfolio.booking.repository.ProfessionalRepository;
 import com.portfolio.booking.repository.ServiceRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,30 +42,22 @@ public class AppointmentService
         Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new IllegalArgumentException("Service not found"));
 
-        // Ensure the appointment is scheduled in the future
-        if(!startDateTime.isAfter(LocalDateTime.now()))
-        {
-            // start:10AM is after now: 10:15AM (False)
-            // start:11AM is after now:10:30AM (True)
-            throw new IllegalArgumentException("Appointment must start in the future");
+        if (!professional.isActive()) {
+            throw new IllegalArgumentException("Inactive professionals cannot receive appointments.");
         }
+
+        if (!service.isActive()) {
+            throw new IllegalArgumentException("Inactive services cannot be booked.");
+        }
+
+        validateFutureDate(startDateTime);
 
         LocalDateTime endDateTime = startDateTime.plusMinutes(service.getDurationMinutes());
 
-        List<Appointment> professionalAppointments = appointmentRepository.findByProfessional(professionalId);
-
-        boolean hasConflict = professionalAppointments.stream()
-                .filter(appointment -> appointment.getStatus() == AppointmentStatus.SCHEDULED)
-                .anyMatch(appointment -> startDateTime.isBefore(appointment.getEndDateTime()) &&
-                        endDateTime.isAfter(appointment.getStartDateTime()));
-
-        if(hasConflict)
-        {
-            throw new IllegalArgumentException("The professional already has an appointment at this time");
-        }
+        validateNoConflict(professionalId, startDateTime, endDateTime, null);
 
         Appointment appointment = new Appointment
-                (null, customer, professional, service, startDateTime, endDateTime, AppointmentStatus.SCHEDULED);
+                (null, customer, professional, service, startDateTime, endDateTime, AppointmentStatus.SCHEDULED, LocalDateTime.now());
 
         return appointmentRepository.save(appointment);
 
@@ -75,9 +68,20 @@ public class AppointmentService
         return appointmentRepository.findAll();
     }
 
+    public List<Appointment> getAppointmentsByFilters(LocalDate date, AppointmentStatus status) {
+        return appointmentRepository.findByFilters(date, status);
+    }
+
     public Appointment getAppointmentById(Long id)
     {
         return appointmentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+    }
+
+    public List<Appointment> getAppointmentsByCustomer(Long customerId) {
+        customerRepository.findById(customerId)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found."));
+
+        return appointmentRepository.findByCustomer(customerId);
     }
 
     public List<Appointment> getAppointmentsByProfessional(Long professionalId)
@@ -92,39 +96,40 @@ public class AppointmentService
     {
 
         // Verify that Appointment exists.
-        Appointment existingAppointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+        Appointment existingAppointment = getAppointmentById(appointmentId);
+
+        if (existingAppointment.getStatus() != AppointmentStatus.SCHEDULED) {
+            throw new IllegalArgumentException("Only scheduled appointments can be updated.");
+        }
 
         // Retrieve the related entities (Customer, Professional and Service)
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+
         Professional professional = professionalRepository.findById(professionalId)
                 .orElseThrow(() -> new IllegalArgumentException("Professional not found"));
+
         Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new IllegalArgumentException("Service not found"));
 
-        // Validate the start date
-        if(!startDateTime.isAfter(LocalDateTime.now()))
-        {
-            throw new IllegalArgumentException("Appointment must start in the future");
+        if (!professional.isActive()) {
+            throw new IllegalArgumentException(
+                    "Inactive professionals cannot receive appointments."
+            );
         }
+
+        if (!service.isActive()) {
+            throw new IllegalArgumentException(
+                    "Inactive services cannot be booked."
+            );
+        }
+
+        validateFutureDate(startDateTime);
 
         // Calculate the new end date
         LocalDateTime endDateTime = startDateTime.plusMinutes(service.getDurationMinutes());
 
-        // Check scheduling conflicts, excluding the current appointment
-        List<Appointment> professionalAppointments = appointmentRepository.findByProfessional(professionalId);
-
-        boolean hasConflict = professionalAppointments.stream()
-            .filter(appointment -> appointment.getStatus() == AppointmentStatus.SCHEDULED)
-            .filter(appointment -> !appointment.getId().equals(appointmentId))
-            .anyMatch(appointment -> startDateTime.isBefore(appointment.getEndDateTime()) &&
-                    endDateTime.isAfter(appointment.getStartDateTime()));
-
-        if (hasConflict)
-        {
-            throw new IllegalArgumentException("The professional already has an appointment at this time");
-        }
+        validateNoConflict(professionalId, startDateTime, endDateTime, appointmentId);
 
         // Create the updated appointment preserving its ID
         Appointment updateAppointment = new Appointment(
@@ -134,7 +139,8 @@ public class AppointmentService
                 service,
                 startDateTime,
                 endDateTime,
-                existingAppointment.getStatus()
+                existingAppointment.getStatus(),
+                existingAppointment.getCreatedAt()
         );
 
         return appointmentRepository.update(updateAppointment);
@@ -142,12 +148,11 @@ public class AppointmentService
 
     public Appointment cancelAppointment(Long appointmentId)
     {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+        Appointment appointment = getAppointmentById(appointmentId);
 
-        if(appointment.getStatus() == AppointmentStatus.CANCELLED)
+        if(appointment.getStatus() != AppointmentStatus.SCHEDULED)
         {
-            throw new IllegalArgumentException("The appointment has been cancelled");
+            throw new IllegalArgumentException("Only scheduled appointments can be cancelled");
         }
 
         Appointment cancelledAppointment = new Appointment(appointment.getId(),
@@ -156,10 +161,30 @@ public class AppointmentService
                 appointment.getService(),
                 appointment.getStartDateTime(),
                 appointment.getEndDateTime(),
-                AppointmentStatus.CANCELLED);
+                AppointmentStatus.CANCELLED,
+                appointment.getCreatedAt());
 
         return appointmentRepository.update(cancelledAppointment);
     }
 
+    private void validateFutureDate(LocalDateTime startDateTime) {
+        if (startDateTime == null || !startDateTime.isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Appointment must start in the future.");
+        }
+    }
+
+    private void validateNoConflict(Long professionalId, LocalDateTime startDateTime,LocalDateTime endDateTime, Long excludedAppointmentId) {
+        List<Appointment> professionalAppointments = appointmentRepository.findByProfessional(professionalId);
+
+        boolean hasConflict = professionalAppointments.stream()
+                .filter(appointment -> appointment.getStatus() == AppointmentStatus.SCHEDULED)
+                .filter(appointment -> excludedAppointmentId == null || !appointment.getId().equals(excludedAppointmentId))
+                .anyMatch(appointment -> startDateTime.isBefore(appointment.getEndDateTime())
+                                && endDateTime.isAfter(appointment.getStartDateTime()));
+
+        if (hasConflict) {
+            throw new IllegalArgumentException("The professional already has an appointment at this time.");
+        }
+    }
 
 }

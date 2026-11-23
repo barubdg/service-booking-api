@@ -36,4 +36,25 @@ public class CustomerService {
     {
         return customerRepository.findAll();
     }
+
+    public Customer getCustomerById(Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found."));
+    }
+
+    public Customer updateCustomer(Long id, Customer updatedCustomer) {
+        Customer existingCustomer = getCustomerById(id);
+
+        if (customerRepository.existsByEmailAndIdNot(updatedCustomer.getEmail(), id)) {
+            throw new IllegalArgumentException("A customer with this email already exists.");
+        }
+
+        Customer customer = new Customer(
+                existingCustomer.getId(),
+                updatedCustomer.getName(),
+                updatedCustomer.getEmail(),
+                updatedCustomer.getPhone());
+
+        return customerRepository.update(customer);
+    }
 }
