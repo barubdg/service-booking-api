@@ -5,6 +5,7 @@ import com.portfolio.booking.dto.response.AppointmentResponse;
 import com.portfolio.booking.model.Appointment;
 import com.portfolio.booking.model.AppointmentStatus;
 import com.portfolio.booking.service.AppointmentService;
+import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public ResponseEntity<AppointmentResponse> createAppointment(@RequestBody AppointmentRequest request)
+    public ResponseEntity<AppointmentResponse> createAppointment(@Valid @RequestBody AppointmentRequest request)
     {
         Appointment appointment = appointmentService.createAppointment(
                 request.customerId(),
@@ -77,7 +78,7 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppointmentResponse> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequest request)
+    public ResponseEntity<AppointmentResponse> updateAppointment(@PathVariable Long id,@Valid @RequestBody AppointmentRequest request)
     {
         Appointment updateAppointment = appointmentService.updateAppointment(
                         id,

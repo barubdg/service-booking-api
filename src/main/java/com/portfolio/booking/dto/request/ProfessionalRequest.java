@@ -1,4 +1,10 @@
 package com.portfolio.booking.dto.request;
 
-public record ProfessionalRequest (String name, String email, String specialty) {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record ProfessionalRequest (
+        @NotBlank(message = "Name is required") String name,
+        @NotBlank(message = "Email is required") @Email(message = "Email must be valid") String email,
+        @NotBlank(message = "Specialty is required") String specialty) {
 }

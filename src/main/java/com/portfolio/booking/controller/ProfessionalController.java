@@ -4,6 +4,7 @@ import com.portfolio.booking.dto.request.ProfessionalRequest;
 import com.portfolio.booking.dto.response.ProfessionalResponse;
 import com.portfolio.booking.model.Professional;
 import com.portfolio.booking.service.ProfessionalService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class ProfessionalController {
     }
 
     @PostMapping
-    public ResponseEntity<ProfessionalResponse> registerProfessional(@RequestBody ProfessionalRequest request)
+    public ResponseEntity<ProfessionalResponse> registerProfessional(@Valid @RequestBody ProfessionalRequest request)
     {
         Professional professional = new Professional(
                 null,
@@ -52,7 +53,7 @@ public class ProfessionalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProfessionalResponse> updateProfessional(@PathVariable Long id, @RequestBody ProfessionalRequest request) {
+    public ResponseEntity<ProfessionalResponse> updateProfessional(@PathVariable Long id, @Valid @RequestBody ProfessionalRequest request) {
         Professional professional = new Professional(
                 id,
                 request.name(),

@@ -4,6 +4,7 @@ import com.portfolio.booking.dto.request.CustomerRequest;
 import com.portfolio.booking.dto.response.CustomerResponse;
 import com.portfolio.booking.model.Customer;
 import com.portfolio.booking.service.CustomerService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerResponse> registerCustomer(@RequestBody CustomerRequest request)
+    public ResponseEntity<CustomerResponse> registerCustomer(@Valid @RequestBody CustomerRequest request)
     {
         Customer customer = new Customer(
                 null,
@@ -52,7 +53,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerResponse> updateCustomer(@PathVariable Long id, @RequestBody CustomerRequest request) {
+    public ResponseEntity<CustomerResponse> updateCustomer(@PathVariable Long id, @Valid @RequestBody CustomerRequest request) {
         Customer customer = new Customer(
                 id,
                 request.name(),

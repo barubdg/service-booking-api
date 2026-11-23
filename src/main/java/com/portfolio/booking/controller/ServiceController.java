@@ -4,6 +4,7 @@ import com.portfolio.booking.dto.request.ServiceRequest;
 import com.portfolio.booking.dto.response.ServiceResponse;
 import com.portfolio.booking.model.Service;
 import com.portfolio.booking.service.ServiceService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class ServiceController {
     }
 
     @PostMapping
-    public ResponseEntity<ServiceResponse> registerService(@RequestBody ServiceRequest request)
+    public ResponseEntity<ServiceResponse> registerService(@Valid @RequestBody ServiceRequest request)
     {
         Service service = new Service(
                 null,
@@ -52,7 +53,7 @@ public class ServiceController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceResponse> updateService(@PathVariable Long id, @RequestBody ServiceRequest request) {
+    public ResponseEntity<ServiceResponse> updateService(@PathVariable Long id,@Valid @RequestBody ServiceRequest request) {
         Service service = new Service(
                 id,
                 request.name(),
