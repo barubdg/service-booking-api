@@ -11,8 +11,9 @@ public class Appointment {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private AppointmentStatus status;
+    private LocalDateTime createdAt;
 
-    public Appointment(Long id, Customer customer, Professional professional, Service service, LocalDateTime startDateTime, LocalDateTime endDateTime, AppointmentStatus status) {
+    public Appointment(Long id, Customer customer, Professional professional, Service service, LocalDateTime startDateTime, LocalDateTime endDateTime, AppointmentStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.customer = customer;
         this.professional = professional;
@@ -20,6 +21,7 @@ public class Appointment {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.status = status;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -48,5 +50,9 @@ public class Appointment {
 
     public AppointmentStatus getStatus() {
         return status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

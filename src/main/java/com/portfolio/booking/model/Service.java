@@ -9,14 +9,21 @@ public class Service {
     private String description;
     private Integer durationMinutes;
     private BigDecimal price;
+    private boolean active;
 
-    public Service(Long id, String name, String description, Integer durationMinutes, BigDecimal price)
+    public Service(Long id, String name, String description,
+                   Integer durationMinutes, BigDecimal price) {
+        this(id, name, description, durationMinutes, price, true);
+    }
+
+    public Service(Long id, String name, String description, Integer durationMinutes, BigDecimal price, boolean active)
     {
         this.id = id;
         this.name = name;
         this.description = description;
         this.durationMinutes = durationMinutes;
         this.price = price;
+        this.active = active;
 
     }
 
@@ -38,5 +45,9 @@ public class Service {
 
     public BigDecimal getPrice() {
         return price;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 }
