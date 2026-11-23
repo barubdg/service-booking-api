@@ -131,4 +131,27 @@ public class AppointmentService
 
         return appointmentRepository.update(updateAppointment);
     }
+
+    public Appointment cancelAppointment(Long appointmentId)
+    {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+
+        if(appointment.getStatus() == AppointmentStatus.CANCELLED)
+        {
+            throw new IllegalArgumentException("The appointment has been cancelled");
+        }
+
+        Appointment cancelledAppointment = new Appointment(appointment.getId(),
+                appointment.getCustomer(),
+                appointment.getProfessional(),
+                appointment.getService(),
+                appointment.getStartDateTime(),
+                appointment.getEndDateTime(),
+                AppointmentStatus.CANCELLED);
+
+        return appointmentRepository.update(cancelledAppointment);
+    }
+
+
 }

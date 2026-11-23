@@ -64,4 +64,12 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<AppointmentResponse> cancelAppointment(@PathVariable Long id)
+    {
+        Appointment cancelledAppointment = appointmentService.cancelAppointment(id);
+        AppointmentResponse response = AppointmentResponse.from(cancelledAppointment);
+        return ResponseEntity.ok(response);
+    }
+
 }
