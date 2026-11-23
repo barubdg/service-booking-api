@@ -3,11 +3,14 @@ package com.portfolio.booking.controller;
 import com.portfolio.booking.dto.request.AppointmentRequest;
 import com.portfolio.booking.dto.response.AppointmentResponse;
 import com.portfolio.booking.model.Appointment;
+import com.portfolio.booking.model.AppointmentStatus;
 import com.portfolio.booking.service.AppointmentService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -35,9 +38,14 @@ public class AppointmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AppointmentResponse>> getAllAppointments()
-    {
-        List<AppointmentResponse> appointments = appointmentService.getAllAppointments().stream().map(AppointmentResponse::from).toList();
+    public ResponseEntity<List<AppointmentResponse>> getAppointments(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) AppointmentStatus status) {
+        List<AppointmentResponse> appointments = appointmentService.getAppointmentsByFilters(date, status)
+                        .stream()
+                        .map(AppointmentResponse::from)
+                        .toList();
+
         return ResponseEntity.ok(appointments);
     }
 
@@ -47,6 +55,16 @@ public class AppointmentController {
         Appointment appointment = appointmentService.getAppointmentById(id);
         AppointmentResponse response = AppointmentResponse.from(appointment);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<AppointmentResponse>> getAppointmentsByCustomer(@PathVariable Long customerId) {
+        List<AppointmentResponse> appointments = appointmentService.getAppointmentsByCustomer(customerId)
+                        .stream()
+                        .map(AppointmentResponse::from)
+                        .toList();
+
+        return ResponseEntity.ok(appointments);
     }
 
     @GetMapping("/professional/{professionalId}")
@@ -59,8 +77,7 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppointmentResponse> updateAppointment(@PathVariable Long id,
-                                                                 @RequestBody AppointmentRequest request)
+    public ResponseEntity<AppointmentResponse> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequest request)
     {
         Appointment updateAppointment = appointmentService.updateAppointment(
                         id,

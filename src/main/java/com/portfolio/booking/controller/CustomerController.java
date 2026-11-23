@@ -42,4 +42,25 @@ public class CustomerController {
         List<CustomerResponse> customers = customerService.getAllCustomers().stream().map(CustomerResponse::from).toList();
         return ResponseEntity.ok(customers);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable Long id) {
+
+        Customer customer = customerService.getCustomerById(id);
+        CustomerResponse response = CustomerResponse.from(customer);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerResponse> updateCustomer(@PathVariable Long id, @RequestBody CustomerRequest request) {
+        Customer customer = new Customer(
+                id,
+                request.name(),
+                request.email(),
+                request.phone());
+
+        Customer updatedCustomer = customerService.updateCustomer(id, customer);
+        CustomerResponse response = CustomerResponse.from(updatedCustomer);
+        return ResponseEntity.ok(response);
+    }
 }

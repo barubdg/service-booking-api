@@ -1,6 +1,5 @@
 package com.portfolio.booking.controller;
 
-
 import com.portfolio.booking.dto.request.ServiceRequest;
 import com.portfolio.booking.dto.response.ServiceResponse;
 import com.portfolio.booking.model.Service;
@@ -45,6 +44,39 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ServiceResponse> getServiceById(@PathVariable Long id) {
+        Service service = serviceService.getServiceById(id);
+        ServiceResponse response = ServiceResponse.from(service);
+        return ResponseEntity.ok(response);
+    }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ServiceResponse> updateService(@PathVariable Long id, @RequestBody ServiceRequest request) {
+        Service service = new Service(
+                id,
+                request.name(),
+                request.description(),
+                request.durationMinutes(),
+                request.price()
+        );
 
+        Service updatedService = serviceService.updateService(id, service);
+        ServiceResponse response = ServiceResponse.from(updatedService);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<ServiceResponse> activateService(@PathVariable Long id) {
+        Service service = serviceService.activateService(id);
+        ServiceResponse response = ServiceResponse.from(service);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<ServiceResponse> deactivateService(@PathVariable Long id) {
+        Service service = serviceService.deactivateService(id);
+        ServiceResponse response = ServiceResponse.from(service);
+        return ResponseEntity.ok(response);
+    }
 }

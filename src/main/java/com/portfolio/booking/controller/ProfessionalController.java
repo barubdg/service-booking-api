@@ -44,6 +44,38 @@ public class ProfessionalController {
         return ResponseEntity.ok(professionals);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ProfessionalResponse> getProfessionalById(@PathVariable Long id) {
+        Professional professional = professionalService.getProfessionalById(id);
+        ProfessionalResponse response = ProfessionalResponse.from(professional);
+        return ResponseEntity.ok(response);
+    }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ProfessionalResponse> updateProfessional(@PathVariable Long id, @RequestBody ProfessionalRequest request) {
+        Professional professional = new Professional(
+                id,
+                request.name(),
+                request.email(),
+                request.specialty()
+        );
 
+        Professional updatedProfessional = professionalService.updateProfessional(id, professional);
+        ProfessionalResponse response = ProfessionalResponse.from(updatedProfessional);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<ProfessionalResponse> activateProfessional(@PathVariable Long id) {
+        Professional professional = professionalService.activateProfessional(id);
+        ProfessionalResponse response = ProfessionalResponse.from(professional);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<ProfessionalResponse> deactivateProfessional(@PathVariable Long id) {
+        Professional professional = professionalService.deactivateProfessional(id);
+        ProfessionalResponse response = ProfessionalResponse.from(professional);
+        return ResponseEntity.ok(response);
+    }
 }
