@@ -43,4 +43,23 @@ public class CustomerRepository {
         return customers.stream()
                 .anyMatch(customer -> customer.getEmail().equalsIgnoreCase(email));
     }
+
+    public boolean existsByEmailAndIdNot(String email, Long id) {
+        return customers.stream()
+                .anyMatch(customer -> customer.getEmail().equalsIgnoreCase(email)
+                        && !customer.getId().equals(id)
+                );
+    }
+
+    public Customer update(Customer customer) {
+        for (int i = 0; i < customers.size(); i++) {
+            if (customers.get(i).getId().equals(customer.getId())) {
+                customers.set(i, customer);
+                return customer;
+            }
+        }
+
+        throw new IllegalArgumentException("Customer not found with id " + customer.getId());
+    }
+
 }

@@ -19,7 +19,8 @@ public class ProfessionalRepository {
                         (nextId++,
                         professional.getName(),
                         professional.getEmail(),
-                        professional.getSpecialty());
+                        professional.getSpecialty(),
+                        professional.isActive());
 
         professionals.add(profesionalWithId);
         return profesionalWithId;
@@ -43,6 +44,24 @@ public class ProfessionalRepository {
                 anyMatch(professional -> professional.getEmail().equalsIgnoreCase(email));
     }
 
+    public boolean existsByEmailAndIdNot(String email, Long id) {
+        return professionals.stream()
+                .anyMatch(professional -> professional.getEmail().equalsIgnoreCase(email)
+                                && !professional.getId().equals(id)
+                );
+    }
 
+    public Professional update(Professional professional) {
+        for (int i = 0; i < professionals.size(); i++) {
+            if (professionals.get(i).getId().equals(professional.getId())) {
+                professionals.set(i, professional);
+                return professional;
+            }
+        }
+
+        throw new IllegalArgumentException(
+                "Professional not found with id " + professional.getId()
+        );
+    }
 
 }

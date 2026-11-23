@@ -1,8 +1,10 @@
 package com.portfolio.booking.repository;
 
 import com.portfolio.booking.model.Appointment;
+import com.portfolio.booking.model.AppointmentStatus;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +25,8 @@ public class AppointmentRepository {
                 appointment.getService(),
                 appointment.getStartDateTime(),
                 appointment.getEndDateTime(),
-                appointment.getStatus()
+                appointment.getStatus(),
+                appointment.getCreatedAt()
         );
 
         appointments.add(appointmentWithId);
@@ -42,7 +45,6 @@ public class AppointmentRepository {
                 .findFirst();
     }
 
-    /* What method would we need in AppointmentRepository to retrieve appointments belonging to a specific professional? */
     public List<Appointment> findByProfessional(Long professionalId)
     {
         return appointments.stream()
@@ -50,11 +52,36 @@ public class AppointmentRepository {
                 .toList();
     }
 
+    public List<Appointment> findByCustomer(Long customerId) {
+        return appointments.stream()
+                .filter(appointment -> appointment.getCustomer().getId().equals(customerId))
+                .toList();
+    }
+
+    public List<Appointment> findByDate(LocalDate date) {
+        return appointments.stream()
+                .filter(appointment -> appointment.getStartDateTime().toLocalDate().equals(date))
+                .toList();
+    }
+
+    public List<Appointment> findByStatus(AppointmentStatus status) {
+        return appointments.stream()
+                .filter(appointment -> appointment.getStatus() == status)
+                .toList();
+    }
+
+    public List<Appointment> findByFilters(LocalDate date, AppointmentStatus status) {
+        return appointments.stream()
+                .filter(appointment -> date == null || appointment.getStartDateTime().toLocalDate().equals(date))
+                .filter(appointment -> status == null || appointment.getStatus() == status)
+                .toList();
+    }
+
     public Appointment update(Appointment appointment)
     {
         if(appointment == null || appointment.getId() == null)
         {
-            throw new IllegalArgumentException("Appointment id not found");
+            throw new IllegalArgumentException("Appointment and appointment ID are required");
         }
         for (int i = 0; i < appointments.size(); i++)
         {
@@ -67,5 +94,4 @@ public class AppointmentRepository {
         }
         throw new IllegalArgumentException("Appointment not found with id"+ appointment.getId());
     }
-
 }

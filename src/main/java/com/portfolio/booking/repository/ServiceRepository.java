@@ -20,7 +20,8 @@ public class ServiceRepository {
                 service.getName(),
                 service.getDescription(),
                 service.getDurationMinutes(),
-                service.getPrice()
+                service.getPrice(),
+                service.isActive()
         );
 
         services.add(serviceWithId);
@@ -37,5 +38,18 @@ public class ServiceRepository {
         return services.stream()
                 .filter(service -> service.getId().equals(id))
                 .findFirst();
+    }
+
+    public Service update(Service service) {
+        for (int i = 0; i < services.size(); i++) {
+            if (services.get(i).getId().equals(service.getId())) {
+                services.set(i, service);
+                return service;
+            }
+        }
+
+        throw new IllegalArgumentException(
+                "Service not found with id " + service.getId()
+        );
     }
 }
