@@ -80,6 +80,14 @@ public class AppointmentService
         return appointmentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
     }
 
+    public List<Appointment> getAppointmentsByProfessional(Long professionalId)
+    {
+        professionalRepository.findById(professionalId)
+                .orElseThrow(() -> new IllegalArgumentException("Professional not found"));
+
+        return appointmentRepository.findByProfessional(professionalId);
+    }
+
     public Appointment updateAppointment(Long appointmentId, Long customerId, Long professionalId, Long serviceId, LocalDateTime startDateTime)
     {
 

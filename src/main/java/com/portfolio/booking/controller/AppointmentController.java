@@ -49,6 +49,15 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/professional/{professionalId}")
+    public ResponseEntity<List<AppointmentResponse>> getAppointmentsByProfessional(@PathVariable Long professionalId)
+    {
+        List<AppointmentResponse> appointments = appointmentService.getAppointmentsByProfessional(professionalId)
+                .stream().map(AppointmentResponse::from).toList();
+
+        return ResponseEntity.ok(appointments);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AppointmentResponse> updateAppointment(@PathVariable Long id,
                                                                  @RequestBody AppointmentRequest request)
