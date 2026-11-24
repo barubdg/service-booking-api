@@ -4,6 +4,9 @@ import com.portfolio.booking.model.Professional;
 import com.portfolio.booking.repository.ProfessionalRepository;
 import org.springframework.stereotype.Service;
 
+import com.portfolio.booking.exception.BusinessException;
+import com.portfolio.booking.exception.ResourceNotFoundException;
+
 import java.util.List;
 
 @Service
@@ -21,7 +24,7 @@ public class ProfessionalService
     {
         if(professionalRepository.existsByEmail(professional.getEmail()))
         {
-            throw new IllegalArgumentException("A professional with this email already exists");
+            throw new BusinessException("A professional with this email already exists");
         }
         return professionalRepository.save(professional);
     }
@@ -33,14 +36,14 @@ public class ProfessionalService
 
     public Professional getProfessionalById(Long id) {
         return professionalRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Professional not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Professional not found."));
     }
 
     public Professional updateProfessional(Long id, Professional updatedProfessional) {
         Professional existingProfessional = getProfessionalById(id);
 
         if (professionalRepository.existsByEmailAndIdNot(updatedProfessional.getEmail(), id)) {
-            throw new IllegalArgumentException("A professional with this email already exists.");
+            throw new BusinessException("A professional with this email already exists.");
         }
 
         Professional professional = new Professional(

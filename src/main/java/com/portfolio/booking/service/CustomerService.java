@@ -4,6 +4,9 @@ import com.portfolio.booking.model.Customer;
 import com.portfolio.booking.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
+import com.portfolio.booking.exception.BusinessException;
+import com.portfolio.booking.exception.ResourceNotFoundException;
+
 import java.util.List;
 
 @Service
@@ -23,9 +26,7 @@ public class CustomerService {
         // Check whether the customer already exists in the repository
         if(customerRepository.existsByEmail(customer.getEmail()))
         {
-            throw new IllegalArgumentException(
-                    "A customer with this email already exists!"
-            );
+            throw new BusinessException("A customer with this email already exists!");
         }
 
         return customerRepository.save(customer);
@@ -39,14 +40,14 @@ public class CustomerService {
 
     public Customer getCustomerById(Long id) {
         return customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found."));
     }
 
     public Customer updateCustomer(Long id, Customer updatedCustomer) {
         Customer existingCustomer = getCustomerById(id);
 
         if (customerRepository.existsByEmailAndIdNot(updatedCustomer.getEmail(), id)) {
-            throw new IllegalArgumentException("A customer with this email already exists.");
+            throw new BusinessException("A customer with this email already exists.");
         }
 
         Customer customer = new Customer(

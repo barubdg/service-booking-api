@@ -3,6 +3,9 @@ package com.portfolio.booking.service;
 import com.portfolio.booking.model.Service;
 import com.portfolio.booking.repository.ServiceRepository;
 
+import com.portfolio.booking.exception.BusinessException;
+import com.portfolio.booking.exception.ResourceNotFoundException;
+
 import java.util.List;
 
 @org.springframework.stereotype.Service
@@ -28,7 +31,7 @@ public class ServiceService {
 
     public Service getServiceById(Long id) {
         return serviceRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Service not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Service not found."));
     }
 
     public Service updateService(Long id, Service updatedService) {
@@ -77,11 +80,11 @@ public class ServiceService {
 
     private void validateService(Service service) {
         if (service.getDurationMinutes() == null || service.getDurationMinutes() <= 0) {
-            throw new IllegalArgumentException("Service duration must be greater than zero.");
+            throw new BusinessException("Service duration must be greater than zero.");
         }
 
         if (service.getPrice() == null || service.getPrice().signum() < 0) {
-            throw new IllegalArgumentException("Service price cannot be negative.");
+            throw new BusinessException("Service price cannot be negative.");
         }
     }
 }

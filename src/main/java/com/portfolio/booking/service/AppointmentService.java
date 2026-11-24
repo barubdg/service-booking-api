@@ -6,6 +6,9 @@ import com.portfolio.booking.repository.CustomerRepository;
 import com.portfolio.booking.repository.ProfessionalRepository;
 import com.portfolio.booking.repository.ServiceRepository;
 
+import com.portfolio.booking.exception.BusinessException;
+import com.portfolio.booking.exception.ResourceNotFoundException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,20 +37,20 @@ public class AppointmentService
     public Appointment createAppointment(Long customerId, Long professionalId, Long serviceId, LocalDateTime startDateTime)
     {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         Professional professional = professionalRepository.findById(professionalId)
-                .orElseThrow(() -> new IllegalArgumentException("Professional not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Professional not found"));
 
         Service service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new IllegalArgumentException("Service not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
         if (!professional.isActive()) {
-            throw new IllegalArgumentException("Inactive professionals cannot receive appointments.");
+            throw new BusinessException("Inactive professionals cannot receive appointments.");
         }
 
         if (!service.isActive()) {
-            throw new IllegalArgumentException("Inactive services cannot be booked.");
+            throw new BusinessException("Inactive services cannot be booked.");
         }
 
         validateFutureDate(startDateTime);
@@ -74,12 +77,12 @@ public class AppointmentService
 
     public Appointment getAppointmentById(Long id)
     {
-        return appointmentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+        return appointmentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
     }
 
     public List<Appointment> getAppointmentsByCustomer(Long customerId) {
         customerRepository.findById(customerId)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found."));
 
         return appointmentRepository.findByCustomer(customerId);
     }
@@ -87,7 +90,7 @@ public class AppointmentService
     public List<Appointment> getAppointmentsByProfessional(Long professionalId)
     {
         professionalRepository.findById(professionalId)
-                .orElseThrow(() -> new IllegalArgumentException("Professional not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Professional not found"));
 
         return appointmentRepository.findByProfessional(professionalId);
     }
@@ -99,29 +102,25 @@ public class AppointmentService
         Appointment existingAppointment = getAppointmentById(appointmentId);
 
         if (existingAppointment.getStatus() != AppointmentStatus.SCHEDULED) {
-            throw new IllegalArgumentException("Only scheduled appointments can be updated.");
+            throw new BusinessException("Only scheduled appointments can be updated.");
         }
 
         // Retrieve the related entities (Customer, Professional and Service)
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         Professional professional = professionalRepository.findById(professionalId)
-                .orElseThrow(() -> new IllegalArgumentException("Professional not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Professional not found"));
 
         Service service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new IllegalArgumentException("Service not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
         if (!professional.isActive()) {
-            throw new IllegalArgumentException(
-                    "Inactive professionals cannot receive appointments."
-            );
+            throw new BusinessException("Inactive professionals cannot receive appointments.");
         }
 
         if (!service.isActive()) {
-            throw new IllegalArgumentException(
-                    "Inactive services cannot be booked."
-            );
+            throw new BusinessException("Inactive services cannot be booked.");
         }
 
         validateFutureDate(startDateTime);
@@ -152,7 +151,7 @@ public class AppointmentService
 
         if(appointment.getStatus() != AppointmentStatus.SCHEDULED)
         {
-            throw new IllegalArgumentException("Only scheduled appointments can be cancelled");
+            throw new BusinessException("Only scheduled appointments can be cancelled");
         }
 
         Appointment cancelledAppointment = new Appointment(appointment.getId(),
@@ -169,7 +168,7 @@ public class AppointmentService
 
     private void validateFutureDate(LocalDateTime startDateTime) {
         if (startDateTime == null || !startDateTime.isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Appointment must start in the future.");
+            throw new BusinessException("Appointment must start in the future.");
         }
     }
 
@@ -183,7 +182,7 @@ public class AppointmentService
                                 && endDateTime.isAfter(appointment.getStartDateTime()));
 
         if (hasConflict) {
-            throw new IllegalArgumentException("The professional already has an appointment at this time.");
+            throw new BusinessException("The professional already has an appointment at this time.");
         }
     }
 
